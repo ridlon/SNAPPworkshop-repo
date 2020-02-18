@@ -1,0 +1,80 @@
+---
+title: "Untitled"
+author: "April Ridlon"
+date: "2/18/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Header One
+
+Some text as an example here **double stars make this bold**
+
+New paragraphs need a blank line between them
+
+* ice 
+* snow
+* sleet
+* rain 
+
+Supports LaTex equations for an MS such as:
+
+$\sum(x^2)$
+
+Pressing "Knit" then gives you the "rendered document", the output that looks like a text file
+
+```{r} #opens a chunk
+``` #closes it- and you really need to remember to close it or it recognizes it all as r code
+
+```{r}
+#comment, not a header
+x <- c(1,2,13,-5)
+x
+```
+
+But Knitting does not actually RUN the code in the computing document (so x won't be saved in the local environment)
+
+You can still write it to a .csv but you can't edit steps etc
+
+However, to run in your local environment, use the toggle to "run current chunk" to get it inot the local environment
+
+
+
+Also, don't use the console to run code with R markdown- you'll get an error 
+
+```{r}
+y <- x + 4 
+print(y)
+```
+
+"Restart R and run all chunks" is great to start fresh again Or "Run all chunks above" when starting a new session
+
+Chunk options 
+
+```{r echo=FALSE}
+y <- x + 4 
+print(y)
+```
+
+The above will only return the result, not the code that generated it, and for plots, for example, this is really helpful (unless you are collaborating on the code, in which case you'd want it to show)
+
+Upload a file from download folder = Upload under Files, select csv from download (or wheverer)
+
+```{r}
+bg_chem <- read.csv(file="data/BGchem2008data.csv")
+```
+
+You can actually leave out the "file = " above like so: 
+bg_chem <- read.csv("data/BGchem2008data.csv")
+
+Rmardown assumes that you're in the working directory that the markdown file is saved in
+
+Use the Tab to autocomplete the file name = genius!
+
+More fun facts:
+
+There is a way to skip some columns in a big .csv: set the header as "false" (and you have to name them separately)  and then use the skip function withinin read.csv function
+
+
