@@ -14,3 +14,10 @@ Editing the *Read me* file can be done from the edit icon on the right
 * collaborator: make changes, stage,commit, push
 * owner: make changes, stage,commit, push--denied
 * owner: resolve changes after merging and then push resolved changes
+
+## Notes on Merge conflicts
+
+*communicate frequently
+* ALWAYS PULL before you start
+* save the file locally, then commit, then PUSH regularly
+* don't hang out for days without doing the above, because then the copy you're using is stale and you will have merge conflicts of epic proportion
