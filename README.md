@@ -3,7 +3,7 @@ Test repository to try Github, SNAPP workshop 2020
 
 Editing the *Read me* file can be done from the edit icon on the right
 
-* add some more text to tht files in R Studio (as opposed to in Github)
+* add some more text to the files in R Studio (as opposed to in Github)
 
 ## How to update shared code
 * collaborator: pull first
