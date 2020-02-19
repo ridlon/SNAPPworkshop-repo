@@ -1,0 +1,178 @@
+---
+title: "Data_cleaning"
+author: "April Ridlon"
+date: "2/19/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+Set up chunk above is a way to set the default arguments for your rmarkdown doc 
+
+```{r, warning= FALSE, message = FALSE}
+library(dplyr)
+library(tidyr)
+```
+
+To supress the warnings, you can use the FALSE commands above
+
+# Read in data 
+[We are using dta from Mike Byerly. Alaska commercial salmon catches by management region (1886- 1997). Gulf of Alaska Data Portal.](df35b.304.2. https://knb.ecoinformatics.org/view/df35b.304.2)
+
+```{r}
+catch.original <- read.csv(url("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.302.1", method= "libcurl"),stringsAsFactors = F)
+```
+For windows machines you need an extra url bit at the beginning 
+this uses a hyperlink to read in the data directly
+
+head(catch.original)
+
+Good to keep an original copy of the data in the code so you can look at the original without having to read it in again
+
+# %>% Pipes
+Can read these as "then", applies the function to a former function
+The shortcut is command shift m
+%>% 
+
+r chunk shortcut is command option i
+
+#Clean and reshape
+
+Remove marginal sum and notes column using 'select()'
+The first argument is always the dataframe
+```{r}
+catch_clean <- catch.original %>% 
+  # select(Region, Year, Chinook, Coho,Pink, Chum)- or a more efficient way:
+  select(-All, -notesRegCode) %>%
+#to change the Chinook from character to number 
+#mutate(Chinook = as.numeric(Chinook))
+#got an error, which we resolve below 
+ mutate(Chinook = ifelse(Chinook == "I", 1, Chinook)) %>% 
+  #where the value is I, change to 1, otherwise keep the value 
+ mutate(Chinook = as.numeric(Chinook))
+
+
+head(catch_clean)
+```
+
+##QA
+Quality Assurance section to check for errors, fix things
+something isn't right in Chinook column and we need to figure it out since we couldn't use as numnmeric to convert
+
+
+```{r}
+i <- which(is.na(catch_clean$Chinook))
+i
+```
+
+The above asks which row contains a character/caused the issue?
+
+```{r}
+catch.original[i,]
+```
+The above shows which row (which is this case was only one)
+Assuming that this is a true error (you'd look at the data)
+
+Reshape from wide to Tall format using 'pivot_longer'
+
+```{r}
+catch_long <- catch_clean  %>%
+  pivot_longer(cols = -c(Region,Year), 
+               names_to = "species",
+               values_to = "catch")
+head(catch_long)
+```
+
+Pivot wider example
+```{r}
+catch_wide <- catch_long %>%
+  pivot_wider(names_from = Year,
+              values_from = catch)
+
+head(catch_wide)
+```
+
+This makes a wide table with Year as the column names and catch as the values
+
+To return to the above chunk, what if we want to rename columns? Use rename.
+And if we want to adjust the way the values show up (e.g. 5 actually means 5 thousand in this dataset). Use mutate. Note that mutate creates a new column, but it will overwrite an existing column if you use the dsame column name as an existing column
+```{r}
+catch_long <- catch_clean  %>%
+  pivot_longer(cols = -c(Region,Year), 
+               names_to = "species",
+               values_to = "catch") %>% 
+rename(catch_thousands = catch) %>% 
+#to change to values in the catch column
+mutate(catch = catch_thousands *1000) %>% 
+#to go back to using only catch as the column name
+select(-catch_thousands)  
+
+head(catch_long)
+```
+
+#group_by and summarize
+Calculate the mean of each region or Species, etc.
+```{r}
+mean_region <- catch_long %>%
+  group_by(Region) %>%
+summarise(catch_mean = mean(catch), num_obs = n())
+
+head(mean_region)
+```
+
+
+Or you could create a table grouped by species 
+```{r}
+mean_species <- catch_long %>%
+  group_by(species) %>%
+summarise(catch_mean = mean(catch), num_obs = n())
+
+head(mean_species)
+```
+
+
+In what year was the total standing catch the highest?
+Group by year, summarise by the SUM of the catch, and arrange in reverse order from default to see the highest # first
+
+```{r}
+mean_total <- catch_long %>%
+  group_by (Year) %>%
+summarise(total_catch = sum(catch))%>%
+arrange(-total_catch)
+
+mean_total
+
+```
+
+
+What year has the highest annual Sockeye catch?
+```{r}
+annual_sockeye <- catch_long %>%
+  filter( species =="Sockeye") %>%
+group_by (Year) %>%
+summarise(total_catch = sum(catch))%>%
+arrange(-total_catch)
+
+annual_sockeye
+
+```
+
+#Join to regions table
+Read in a new csv, and select the columns you want to do the join with
+```{r}
+region_defs <- read.csv("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.303.1", stringsAsFactors = FALSE) %>%
+  select(code, mgmtArea)
+
+head(region_defs)
+```
+
+Now to do a left hand join with catch_long 
+
+```{r}
+catch_joined <- left_join(catch_long, region_defs, by = c("Region" = "code"))
+
+head(catch_joined)
+```
+
+
