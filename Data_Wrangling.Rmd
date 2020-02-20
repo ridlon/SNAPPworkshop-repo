@@ -182,3 +182,38 @@ p2 <- ggplot(annual_esc, aes(x = Species, y = escapement)) +
 p1 + p2
 ```
 
+#Writing Functions
+
+Write a function that computes the percentage of a number: n*p/100
+```{r}
+percent_function <- function(n,p){
+ n*p/100}
+#to check if its running, call it and give it numbers 
+percent_function(100,10)
+#[1] 10
+```
+
+Make the ratio factor an argument so we can also use it to compute 1/1000 
+```{r}
+ratio_function <- function(n,p,r = 100){
+ n*p/r
+}
+#r = 100 sets the default as 100, but naming it r also allows you the felxibility to define r as anything (1000, 2000, etc), as we do below 
+ratio_function (134, 3, 1000)
+```
+
+On the same script write a second function to compute a2-b2
+```{r}
+ab_function <- function(a,b) {
+  a^2 - b^2
+}
+ab_function (2, 3)
+```
+Modify your function to compute the square root: sqrt(a2-b2)
+
+```{r}
+ab_function <- function(a,b) {
+  sqrt(a^2) - sqrt(b^2)
+}
+ab_function (2, 3)
+```
