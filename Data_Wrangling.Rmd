@@ -66,5 +66,20 @@ nrow(annual_esc)
 
 keyboard shorcut: Hold command and click on the name of the dataframe, and it will come up/show in the window (as shorcut instead of view(dataframe)
 
+#Data Visulization with ggplot
+First look at the database
+```{r}
+ggplot(annual_esc, aes(x = Species, y = escapement)) +
+  geom_col()
+```
+
+Changing the colors of the bars
+
+
+```{r}
+ggplot(annual_esc, aes(x = Species, y = escapement)) +
+  #the fill goes inside the geom_col bc you are telling it to fill the bars
+  geom_col(fill= "blue")
+```
 
 
