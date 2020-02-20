@@ -82,4 +82,103 @@ ggplot(annual_esc, aes(x = Species, y = escapement)) +
   geom_col(fill= "blue")
 ```
 
+aes can be read as "mapping" or "axis"- it is what you are mapping to the plot - a variable
+if its not a variable (e.g. color), then it goes to the geom
+
+To create a bar graph by region 
+```{r}
+ggplot(annual_esc, aes(x = Species, y = escapement, fill = SASAP.Region)) +
+  geom_col()
+```
+
+Looking into the Kodiac region over a timeseries, using geom_line and some tidyverse functions 
+
+```{r}
+annual_esc %>% 
+  filter(SASAP.Region == "Kodiak") %>% 
+  # the == here is a conditional test "where region is equal to Kodiak"
+  ggplot(aes(x = Year, y = escapement, color = Species)) + 
+  #to get a timeseries, just plotting Year on the xaxis
+  #to add color by species, you specify color = Species 
+    geom_line() +
+  #to add points to the line graph for more clarity   
+    geom_point()
+
+```
+
+Background, themes
+
+```{r}
+annual_esc %>% 
+  filter(SASAP.Region == "Kodiak") %>% 
+  # the == here is a conditional test "where region is equal to Kodiak"
+  ggplot(aes(x = Year, y = escapement, color = Species)) + 
+  #to get a timeseries, just plotting Year on the xaxis
+  #to add color by species, you specify color = Species 
+    geom_line() +
+  #to add points to the line graph for more clarity   
+    geom_point() +
+ggtitle("Salmon Escapement for the Kodiak") +
+   ylab("Escapement") +
+#to get rid of the grey grids in back
+   theme_bw() +
+#set the pre-set theme first, because if you center the plot and them run theme_bw it would overwrite the title adjustment
+#to get the title centered, use the plot.title, then to move the legend to the bottom use legend.position    
+  theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom")
+
+```
+
+#Setting GGplot Themes
+
+Save a theme
+
+```{r}
+my_theme <- theme_bw() +
+   theme(plot.title = element_text(hjust = 0.5), 
+         legend.position = "bottom",
+         #to remove the legend title
+         legend.title = element_blank())
+
+annual_esc %>% 
+  filter(SASAP.Region == "Kodiak") %>% 
+  ggplot(aes(x = Year, y = escapement, color = Species)) + 
+    geom_line() +
+    geom_point() +
+ggtitle("Salmon Escapement for the Kodiak") +
+   ylab("Escapement") +
+  my_theme
+```
+
+#Using Facets
+```{r}
+ggplot(annual_esc, aes(x = Year, y = escapement, color = Species)) + 
+    geom_line() +
+    geom_point() +
+    scale_y_continuous(labels = comma) +
+    facet_wrap(~SASAP.Region, scales = "free_y", ncol = 2) +
+    ylab("Escapement") +
+    my_theme
+```
+
+Put two plots side by side 
+
+```{r}
+#uses the pkg patchwork (already loaded in)
+library(patchwork)
+
+# Plot 1
+p1 <- ggplot(annual_esc, aes(x = Species, y = escapement)) +
+  geom_col() + 
+  my_theme
+
+# Plo2
+p2 <- ggplot(annual_esc, aes(x = Species, y = escapement)) +
+  geom_col(fill = "blue") +
+    my_theme
+
+#Create two different plots as objects as above
+#then add the objects (plot) together in a very simple syntax and it 
+# puts the plots to gether in one figure
+p1 + p2
+```
 
