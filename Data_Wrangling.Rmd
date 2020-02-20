@@ -9,7 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Ggplot Practice
+Ggplot Practice aka Data Wrangling
 
 
 ```{r}
@@ -21,4 +21,50 @@ library(DT)
 library(scales) # install.packages("scales")
 library(patchwork) # install.packages("patchwork")
 ```
+
+#Loading the Data
+```{r}
+data_url <- "https://knb.ecoinformatics.org/knb/d1/mn/v2/object/urn%3Auuid%3Af119a05b-bbe7-4aea-93c6-85434dcb1c5e"
+
+esc <- tryCatch(
+    read.csv("data/escapement.csv", stringsAsFactors = FALSE),
+    error=function(cond) {
+        message(paste("Escapement file does not seem to exist, so get it from the KNB."))
+        esc <- read.csv(url(data_url, method = "libcurl"), stringsAsFactors = FALSE)
+        return(esc)
+    }
+)
+
+head(esc)
+```
+The above gives an error message but the tryCatch function says if this is already loaded locally, read it, if not it downloads it from the url
+
+#Data Processing 
+
+```{r}
+annual_esc <- esc %>% 
+  #to separate the year, month and day, which are all in one column right now
+  # sep = says separate by - which is how the data are entered originally
+  separate(sampleDate, c("Year", "Month", "Day"), sep = "-") %>% 
+  #check to see that the separation went well (hold command and click on annual_esc above)
+  #the Year is character right now, so use mutate to change it to numeric
+  mutate(Year = as.numeric(Year)) %>% 
+  #to do a bunch of columns at once you could use this syntax: as.numeric(c(Year, Month, Day))
+  #Now group by species, region, and year (at once) 
+  group_by(Species, SASAP.Region, Year) %>% 
+  #Since we want a total sum daily count, we use summarize as so
+  summarize(escapement = sum(DailyCount)) %>% 
+  #We now want to select only certain species, so we'll use filter to keep only some 
+  # %in% function says is this specific value inside a set? 
+  filter(Species %in% c("Chinook", "Sockeye", "Chum", "Coho", "Pink"))
+
+head(annual_esc)
+
+#check number of rows
+nrow(annual_esc)
+```
+
+keyboard shorcut: Hold command and click on the name of the dataframe, and it will come up/show in the window (as shorcut instead of view(dataframe)
+
+
 
